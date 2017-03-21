@@ -1,5 +1,8 @@
 html, body {
   height: 100%;
+  background-color: #60a5da;
+  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica, helvetica neue, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
+  color: #fff;
 }
 
 body {
@@ -7,10 +10,41 @@ body {
   margin-top: 10%;
 }
 
-.avatar {
-  border-radius: 3px;
+.container {
+    width: 60%;
 }
 
-.input_box, .button {
-  border-radius: 5px;
+.avatar {
+  width: 30%;
+}
+
+form {
+    margin-top: 3em
+}
+
+#username {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn {
+  margin-top: 1em;
+}
+
+.btn,
+.btn:active,
+.btn:hover,
+.btn:focus {
+  background-color: #60a5da;
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+.learn-more {
+    margin-top: 4em;
+}
+
+.learn-more a {
+    color: #eee;
 }

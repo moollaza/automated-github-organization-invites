@@ -1,3 +1,4 @@
+require 'dotenv/load'
 require 'rubygems'
 require 'bundler/setup'
 require 'sinatra'
@@ -5,88 +6,53 @@ require 'slim'
 require 'octokit'
 
 token = ENV['GITHUB_TOKEN']
-org_name = ENV['ORGANIZATION_NAME']
-background_choice = ENV['BACKGROUND_COLOR']
-
-if background_choice == 'green'
-    background_css = "/css/background_colors/green.css"
-elsif background_choice == 'blue'
-    background_css = "/css/background_colors/blue.css"
-elsif background_choice == 'pink'
-    background_css = "/css/background_colors/pink.css"
-elsif background_choice == 'red'
-    background_css = "/css/background_colors/red.css"
-elsif background_choice == 'grey'
-    background_css = "/css/background_colors/grey.css"
-else
-    background_css = "/css/background_colors/white.css"
-end
-
-html_template_path = File.join(__dir__, 'views', 'index.slim')
-@layout = File.read(html_template_path)
+team_id = ENV['TEAM_ID']
 
 client = Octokit::Client.new(access_token: token)
 
 def user_exists?(client, user)
   begin
-    profile = client.user(user)
+    response = client.user(user)
   rescue Octokit::NotFound
     return false
   end
   return true
 end
 
-def get_org_avatar_url(client, org_name)
+def is_team_member?(client, team_id, user)
   begin
-    org = client.user(org_name)
+    response = client.team_membership(team_id, user)
+    return response.state
   rescue Octokit::NotFound
-    return nil
-  end
-  org[:avatar_url]
-end
-
-def get_org_id(client, org_name)
-  begin
-    org = client.user(org_name)
-    return org.id
-  rescue Octokit::NotFound
-    return nil
+    return false
   end
 end
 
-def get_org_teams(client, org_name)
-  begin
-    teams = client.org_teams(org_name)
-    return teams
-  rescue Octokit::NotFound
-    return nil
-  end
-end
-
-def check_org_exists(client, org_name)
-  unless get_org_avatar_url(client, org_name).nil?
-    return true
-  end
-  return false
-end
-
-# The URL for the Organisation's picture/avatar
-avatar = get_org_avatar_url(client, org_name)
-org_id = get_org_id(client, org_name)
-
-l = Slim::Template.new { @layout }
 
 # ROUTES #
 
 get "/" do
-  slim l.render(Object.new, :avatar => avatar, :org_name => org_name, :background_css => background_css)
+  slim :index, :locals => { :profile => @profile }
 end
 
 post "/add" do
-  if user_exists?(client, params["github"])
-    client.update_organization_membership(org_name, :user => params["github"])
-    "OK, Check your EMAIL"
+  username = params["username"]
+  if user_exists?(client, username)
+    membership = is_team_member?(client, team_id, username)
+    if membership == "active"
+      heading = "#{username} is already an active member of the team!"
+      message = nil
+    elsif membership == "pending"
+      heading = "#{username}'s team membership is pending"
+      message = "Please check your email for an invitation.<br>Follow the instructions to finish joining the team."
+    else
+      client.add_team_membership(client, team_id, username)
+      heading = "Sweet! You're almost done..."
+      message = 'Please check your email for an invitation.<br>Follow the instructions to finish joining the team.'
+    end
   else
-    "User not found. Please check your spelling"
+    heading = "Uh oh!"
+    message = "User not found. Please check your spelling"
   end
+  slim :result, :locals => { :heading => heading, :message => message }
 end

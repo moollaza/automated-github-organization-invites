@@ -12,6 +12,7 @@ creds.rb
 /test/tmp/
 /test/version_tmp/
 /tmp/
+.env
 
 # Used by dotenv library to load environment variables.
 # .env
