@@ -15,7 +15,6 @@ if team_id == nil
     abort("Please provide a GitHub Team ID!")
 end
 
-
 client = Octokit::Client.new(access_token: token)
 
 # Check user is real
@@ -41,10 +40,9 @@ end
 # Add user to team
 def add_team_member?(client, team_id, user)
     begin
-        response = client.add_team_membership(client, team_id, user)
+        response = client.add_team_membership(team_id, user)
         return response
-    rescue
-        puts 'add_team_member FAILED'
+    rescue Exception
         return false
     end
 end
