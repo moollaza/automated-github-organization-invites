@@ -56,28 +56,28 @@ end
 
 
 post '/add' do
-    @username = params['username']
+    username = params['username']
     # Check if user is real
-    if user_exists?(client, @username)
-        membership = is_team_member?(client, team_id, @username)
+    if user_exists?(client, username)
+        membership = is_team_member?(client, team_id, username)
 
         # Already team member
         if membership == 'active'
-            heading = "#{@username} is already an active member of the team!"
+            heading = "#{username} is already an active member of the team!"
             message = nil
 
         # Invite already sent
         elsif membership == 'pending'
-            heading = "#{@username}'s team membership is pending"
+            heading = "#{username}'s team membership is pending"
             message = 'Please check your email for an invitation.<br>Follow the instructions to finish joining the team.'
 
         # Not a team member
         else
-            response = add_team_member?(client, team_id, @username)
+            response = add_team_member?(client, team_id, username)
 
             # Invitation failed
             if response == false
-                heading = "Uh oh! We were unable to add #{@username} to the team!"
+                heading = "Uh oh! We were unable to add #{username} to the team!"
                 message = 'Please contact open@duckduckgo.com to let us know.'
             # Invitation successfully sent
             elsif response.state == 'pending'
@@ -87,7 +87,7 @@ post '/add' do
         end
     else
         heading = 'Uh oh!'
-        message = "User: '#{@username}' not found. Please check your spelling."
+        message = "User: '#{username}' not found. Please check your spelling."
     end
     slim :result, locals: { heading: heading, message: message }
 end
